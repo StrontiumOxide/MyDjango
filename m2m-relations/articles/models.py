@@ -20,7 +20,7 @@ class Article(models.Model):
 class Scope(models.Model):
 
     is_main = models.BooleanField(verbose_name='Основной')
-    articles = models.ManyToManyField(to='Article', related_name='scopes')
+    articles = models.ManyToManyField(to='Article', related_name='scopes', through='Tag')
 
 
 class Tag(models.Model):
