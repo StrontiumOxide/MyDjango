@@ -7,33 +7,26 @@ from .models import Article, Tag, Scope
 
 class RelationshipInlineFormset(BaseInlineFormSet):
     def clean(self):
+        super().clean()
+        main_tags_count = 0
         for form in self.forms:
-            # В form.cleaned_data будет словарь с данными
-            # каждой отдельной формы, которые вы можете проверить
-            form.cleaned_data
-            # вызовом исключения ValidationError можно указать админке о наличие ошибки
-            # таким образом объект не будет сохранен,
-            # а пользователю выведется соответствующее сообщение об ошибке
-            raise ValidationError('Тут всегда ошибка')
-        return super().clean()  # вызываем базовый код переопределяемого метода
-    
+            if form.cleaned_data.get('is_main'):
+                main_tags_count += 1
+            if main_tags_count > 1:
+                raise ValidationError('Только один тег может быть основным.')
+
 
 class RelationshipInline(admin.TabularInline):
-    model = Tag
+    model = Scope
     formset = RelationshipInlineFormset
-
+    extra = 1
 
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
-    pass
+    inlines = [RelationshipInline]
 
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     pass
-
-
-@admin.register(Scope)
-class ScopeAdmin(admin.ModelAdmin):
-    inlines = [RelationshipInline]
